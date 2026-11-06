@@ -4,8 +4,8 @@
 name: arXiv-daily-ai-enhanced
 
 on:
-  schedule:
-    - cron: "30 17 * * *"
+  # Daily generation runs on the owner's Mac using ChatGPT subscription auth.
+  # Keep the original API workflow manual-only to avoid duplicate API runs.
   workflow_dispatch:
 
 

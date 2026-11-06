@@ -1,0 +1,11 @@
+{
+  "categories": ["cs.RO", "cs.AI", "cs.LG", "eess.SY", "cs.CV"],
+  "language": "Chinese",
+  "model": "gpt-6.1-sol",
+  "horizon_directory": "~/Horizon",
+  "repository": "https://github.com/Kylineason-Liu/daily-arXiv-ai-enhanced.git",
+  "time_zone": "Asia/Hong_Kong",
+  "hour": 9,
+  "minute": 0,
+  "batch_size": 8
+}
