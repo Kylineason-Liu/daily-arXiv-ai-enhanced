@@ -156,12 +156,11 @@ def collect(settings):
 
 
 def bridge(settings, system, user):
-    horizon = Path(settings['horizon_directory']).expanduser().resolve()
     result = subprocess.run([
-        str(horizon / '.venv/bin/python'), str(ROOT / 'scripts/chatgpt_bridge.py'),
-        '--horizon', str(horizon), '--model', settings['model'],
+        sys.executable, str(ROOT / 'scripts/chatgpt_bridge.py'),
+        '--model', settings['model'],
     ], input=json.dumps({'system': system, 'user': user}, ensure_ascii=False),
-        text=True, capture_output=True, timeout=600, cwd=horizon)
+        text=True, capture_output=True, timeout=600, cwd=ROOT)
     if result.returncode:
         raise RuntimeError(result.stderr.strip() or 'ChatGPT bridge failed')
     raw = result.stdout.strip()
@@ -274,7 +273,7 @@ def publish(settings, output_dir):
     print('Published data to GitHub.', flush=True)
 
 
-def run(settings, sample=0, should_publish=False):
+def run(settings, sample=0, should_publish=False, should_email=False):
     snapshot = collect(settings)
     date = snapshot['announcement_date']
     write_json(STATE / 'collections' / f'{date}.json', snapshot)
@@ -292,6 +291,9 @@ def run(settings, sample=0, should_publish=False):
         if sample:
             raise ValueError('Sample runs cannot be published as a complete daily digest')
         publish(settings, output)
+        if should_email:
+            from email_notification import notify
+            notify(settings, manifest, STATE)
     print(f'Completed: {len(papers)} papers. Output: {output}', flush=True)
 
 
@@ -301,10 +303,13 @@ def main():
     parser.add_argument('command', choices=['collect', 'check', 'run', 'publish'])
     parser.add_argument('--sample', type=int, default=0)
     parser.add_argument('--publish', action='store_true')
+    parser.add_argument('--email', action='store_true', help='Email after successful publication')
     parser.add_argument('--date', help='Completed announcement date to publish')
     args = parser.parse_args()
     if args.sample < 0 or (args.sample and args.publish):
         parser.error('Samples must be positive and cannot be published')
+    if args.email and not (args.command == 'publish' or (args.command == 'run' and args.publish and not args.sample)):
+        parser.error('--email requires a complete run --publish or publish --date')
     settings = json.loads((ROOT / 'personal-settings.json').read_text())
     STATE.mkdir(parents=True, exist_ok=True)
     with (STATE / 'run.lock').open('w') as lock:
@@ -329,8 +334,11 @@ def main():
             if manifest.get('sample'):
                 raise ValueError('Refusing to publish sample')
             publish(settings, output)
+            if args.email:
+                from email_notification import notify
+                notify(settings, manifest, STATE)
         else:
-            run(settings, args.sample, args.publish)
+            run(settings, args.sample, args.publish, args.email)
 
 
 if __name__ == '__main__':

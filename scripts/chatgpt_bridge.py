@@ -1,7 +1,6 @@
-"""Use Horizon's existing, locally authorized ChatGPT provider over stdin/stdout."""
+"""Use the locally authorized ChatGPT provider over stdin/stdout."""
 import argparse
 import json
-from pathlib import Path
 import sys
 
 
@@ -27,18 +26,16 @@ def completed_text(stream):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--horizon', required=True)
     parser.add_argument('--model', required=True)
     args = parser.parse_args()
-    sys.path.insert(0, str(Path(args.horizon).resolve()))
-    from src.ai.chatgpt_auth import ChatGPTAuth, RESOURCE, api_error
+    from chatgpt_auth import ChatGPTAuth, RESOURCE, api_error
     from openai import OpenAI, APIError
 
     request = json.load(sys.stdin)
     auth = ChatGPTAuth()
     status = auth.status()
     if not status['connected'] or not status['plan_usage']:
-        raise RuntimeError('Horizon ChatGPT subscription authorization is required')
+        raise RuntimeError('ChatGPT subscription authorization is required')
     token = auth.access_token(status['client_id'])
     try:
         with OpenAI(api_key=token, base_url=RESOURCE, max_retries=0, timeout=300) as client:

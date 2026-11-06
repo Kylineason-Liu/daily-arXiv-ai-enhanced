@@ -17,7 +17,7 @@ logs = Path.home() / '.local/share/arxiv-daily/logs'
 logs.mkdir(parents=True, exist_ok=True)
 agent = {
     'Label': LABEL,
-    'ProgramArguments': ['/usr/bin/caffeinate', '-i', str(ROOT / '.venv/bin/python'), str(ROOT / 'scripts/daily.py'), 'run', '--publish'],
+    'ProgramArguments': ['/usr/bin/caffeinate', '-i', str(ROOT / '.venv/bin/python'), str(ROOT / 'scripts/daily.py'), 'run', '--publish', '--email'],
     'WorkingDirectory': str(ROOT),
     'StartCalendarInterval': {'Hour': settings['hour'], 'Minute': settings['minute']},
     'RunAtLoad': False, 'KeepAlive': False,

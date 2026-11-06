@@ -2,14 +2,14 @@
 
 ## Personal installation: local ChatGPT subscription + GitHub Pages
 
-This fork generates Chinese summaries on the owner's Mac at **09:00 Asia/Hong_Kong** and publishes paper data to the `data` branch. The website is hosted at https://kylineason-liu.github.io/daily-arXiv-ai-enhanced/.
+This fork generates Chinese summaries on the owner's Mac at **09:00 Asia/Hong_Kong** and publishes paper data to the `data` branch, then emails the owner a link to the completed digest. The website is hosted at https://kylineason-liu.github.io/daily-arXiv-ai-enhanced/.
 
 - Settings: `personal-settings.json`.
 - Categories: `cs.RO`, `cs.AI`, `cs.LG`, `eess.SY`, `cs.CV`.
-- Model: `gpt-6.1-sol`, through the existing local Horizon ChatGPT authorization.
+- Model: `gpt-6.1-sol`, using the standalone local ChatGPT authorization module; Horizon is no longer required.
 - Includes new submissions and cross-lists, excludes replacements, and deduplicates papers across categories. Each category's fetched count is checked against its official announcement list.
 - Summaries use abstracts, retain every collected paper, and do not call the upstream external content-filter service.
-- Credentials stay in Horizon's local authorization store. This workflow has no paid-API fallback and uploads only public paper data and summaries.
+- ChatGPT credentials stay in `~/.config/arxiv-daily/chatgpt/`; the Gmail sender and app password stay in `~/.config/arxiv-daily/mail.json` (owner-only permissions, outside the Git repository). This workflow has no paid-API fallback and uploads only public paper data and summaries.
 - Completed summaries are cached in `~/.local/share/arxiv-daily/` for interrupted-run recovery. The website is updated only after the complete collection has summaries.
 
 Run these commands from the repository root:
@@ -18,8 +18,8 @@ Run these commands from the repository root:
 # Verify the ChatGPT subscription connection.
 .venv/bin/python scripts/daily.py check
 
-# Generate a complete daily digest and publish it.
-.venv/bin/python scripts/daily.py run --publish
+# Generate a complete daily digest, publish it, and email its link.
+.venv/bin/python scripts/daily.py run --publish --email
 
 # Install the macOS daily schedule without triggering an immediate run.
 .venv/bin/python scripts/install_macos_schedule.py
@@ -27,7 +27,18 @@ Run these commands from the repository root:
 
 The Mac must be logged in, awake, and online for an on-time run. A missed sleep-time trigger may run after wake; a powered-off Mac cannot generate the report. Closing Terminal or Codex is fine. The site groups data by **arXiv announcement date**, which can differ from the Hong Kong run date. On days with no new announcement, cached summaries prevent repeated AI processing.
 
-Logs: `~/.local/share/arxiv-daily/logs/scheduler.stdout.log` and `scheduler.stderr.log`. Outputs and completeness manifests: `~/.local/share/arxiv-daily/output/`. If subscription authorization expires or is revoked, reconnect using Horizon's `horizon-chatgpt login` command. The original GitHub API workflow below is retained for manual use only.
+Logs: `~/.local/share/arxiv-daily/logs/scheduler.stdout.log` and `scheduler.stderr.log`. Outputs and completeness manifests: `~/.local/share/arxiv-daily/output/`. If subscription authorization expires or is revoked, reconnect using `.venv/bin/python scripts/chatgpt_account.py login`. The migrated authorization keeps its existing account registration, so ChatGPT settings may still show its original Horizon name; revoking that registration also revokes this installation's access. The original GitHub API workflow below is retained for manual use only.
+
+
+Email is sent only after successful publication, at most once per Hong Kong calendar day. It includes the announcement date, deduplicated paper count, category counts, and website link. Days without a new arXiv announcement link to the latest available issue. Delivery state is stored in `~/.local/share/arxiv-daily/email-delivery.json`. An uncertain SMTP delivery remains `pending` to avoid duplicate mail; check Gmail Sent before manually clearing that record. Failed collection, summary generation, or publication never sends a success notification.
+
+To retry publication and notification for an already completed issue without generating summaries again:
+
+```bash
+.venv/bin/python scripts/daily.py publish --date YYYY-MM-DD --email
+```
+
+The authentication module was adapted from the local Horizon installation; its MIT license is retained in `scripts/HORIZON-LICENSE.txt`.
 
 ---
 

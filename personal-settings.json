@@ -1,11 +1,20 @@
 {
-  "categories": ["cs.RO", "cs.AI", "cs.LG", "eess.SY", "cs.CV"],
+  "categories": [
+    "cs.RO",
+    "cs.AI",
+    "cs.LG",
+    "eess.SY",
+    "cs.CV"
+  ],
   "language": "Chinese",
   "model": "gpt-6.1-sol",
-  "horizon_directory": "~/Horizon",
   "repository": "https://github.com/Kylineason-Liu/daily-arXiv-ai-enhanced.git",
   "time_zone": "Asia/Hong_Kong",
   "hour": 9,
   "minute": 0,
-  "batch_size": 8
+  "batch_size": 8,
+  "email": {
+    "enabled": true,
+    "website": "https://kylineason-liu.github.io/daily-arXiv-ai-enhanced/"
+  }
 }
