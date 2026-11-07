@@ -2,7 +2,7 @@
 
 ## Personal installation: local ChatGPT subscription + GitHub Pages
 
-This fork generates Chinese summaries on the owner's Mac at **09:00 Asia/Hong_Kong** and publishes paper data to the `data` branch, then emails the owner a link to the completed digest. The website is hosted at https://kylineason-liu.github.io/daily-arXiv-ai-enhanced/.
+This fork generates Chinese summaries on the owner's Mac at **09:00 Asia/Hong_Kong, Monday–Friday** and publishes paper data to the `data` branch, then emails the owner a link to the completed digest. The website is hosted at https://kylineason-liu.github.io/daily-arXiv-ai-enhanced/.
 
 - Settings: `personal-settings.json`.
 - Categories: `cs.RO`, `cs.AI`, `cs.LG`, `eess.SY`, `cs.CV`.
@@ -21,7 +21,7 @@ Run these commands from the repository root:
 # Generate a complete daily digest, publish it, and email its link.
 .venv/bin/python scripts/daily.py run --publish --email
 
-# Install the macOS daily schedule without triggering an immediate run.
+# Install the macOS weekday schedule without triggering an immediate run.
 .venv/bin/python scripts/install_macos_schedule.py
 ```
 

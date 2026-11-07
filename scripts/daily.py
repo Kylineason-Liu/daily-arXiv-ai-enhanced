@@ -304,6 +304,7 @@ def main():
     parser.add_argument('--sample', type=int, default=0)
     parser.add_argument('--publish', action='store_true')
     parser.add_argument('--email', action='store_true', help='Email after successful publication')
+    parser.add_argument('--weekdays-only', action='store_true', help='Skip scheduled runs on Hong Kong weekends')
     parser.add_argument('--date', help='Completed announcement date to publish')
     args = parser.parse_args()
     if args.sample < 0 or (args.sample and args.publish):
@@ -311,6 +312,9 @@ def main():
     if args.email and not (args.command == 'publish' or (args.command == 'run' and args.publish and not args.sample)):
         parser.error('--email requires a complete run --publish or publish --date')
     settings = json.loads((ROOT / 'personal-settings.json').read_text())
+    if args.command == 'run' and args.weekdays_only and datetime.now(ZoneInfo(settings['time_zone'])).weekday() >= 5:
+        print('Hong Kong weekend; scheduled update and email skipped.')
+        return
     STATE.mkdir(parents=True, exist_ok=True)
     with (STATE / 'run.lock').open('w') as lock:
         try:
