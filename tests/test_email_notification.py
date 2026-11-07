@@ -40,6 +40,15 @@ class EmailTests(unittest.TestCase):
         self.assertIn('2026-11-06', message['Subject'])
         self.assertIn('https://example.com/daily/', message.get_body(preferencelist=('plain',)).get_content())
 
+    def test_previously_sent_issue_is_marked_as_no_new_announcement(self):
+        (self.root / 'email-delivery.json').write_text(json.dumps({
+            '2000-01-01': {'status': 'sent', 'announcement_date': '2026-11-06'}
+        }))
+        email.notify(self.settings, self.manifest, self.root)
+        message = self.server.send_message.call_args.args[0]
+        self.assertIn('今日无新公告', message['Subject'])
+        self.assertIn('最近一期仍为 2026-11-06', message.get_body(preferencelist=('plain',)).get_content())
+
     def test_uncertain_delivery_is_not_automatically_repeated(self):
         self.server.send_message.side_effect = TimeoutError('Connection lost')
         with self.assertRaises(TimeoutError):

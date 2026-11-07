@@ -28,21 +28,23 @@ def save_state(path, value):
             os.unlink(name)
 
 
-def build_message(settings, manifest, sender, now):
+def build_message(settings, manifest, sender, now, has_new_announcement=True):
     date = manifest['announcement_date']
     count = manifest['total_unique']
     website = settings['email']['website']
     message = EmailMessage()
     message['From'] = f'arXiv Daily <{sender}>'
     message['To'] = sender
-    message['Subject'] = f'arXiv 日报已更新 — {date} · {count} 篇论文'
+    heading = 'arXiv 日报已更新' if has_new_announcement else 'arXiv 今日无新公告'
+    introduction = '你的 arXiv 日报已生成并发布。' if has_new_announcement else f'arXiv 暂无新一批论文公告，最近一期仍为 {date}。以下数量为最近一期的论文数量。'
+    message['Subject'] = f'{heading} — 最近一期 {date} · {count} 篇论文'
     message['Date'] = format_datetime(now)
     message['Message-ID'] = make_msgid(domain='gmail.com')
     categories = '\n'.join(
         f"• {category}：{sum(counts.values())} 篇" for category, counts in manifest['categories'].items()
     )
     body = (
-        f"你的 arXiv 日报已生成并发布。\n\n"
+        f"{introduction}\n\n"
         f"arXiv 公告日期：{date}\n去重后共 {count} 篇论文，均已生成中文摘要。\n\n"
         f"阅读日报：\n{website}\n\n{categories}\n\n"
         "各分类数量包含交叉分类，因此相加可能大于去重后的总数。\n"
@@ -53,7 +55,7 @@ def build_message(settings, manifest, sender, now):
     )
     message.set_content(body)
     message.add_alternative(
-        '<html><body><h2>arXiv 日报已更新</h2>'
+        f'<html><body><h2>{heading}</h2>'
         f'<p>公告日期：{html.escape(date)}；去重后 <strong>{count}</strong> 篇。</p>'
         f'<p><a href="{html.escape(website, quote=True)}">打开日报网页</a></p>'
         f'<pre style="white-space:pre-wrap;font-family:inherit">{html.escape(body)}</pre>'
@@ -79,7 +81,11 @@ def notify(settings, manifest, state_directory):
         raise RuntimeError(f'Email delivery for {day} is uncertain; check Gmail Sent before retrying. State: {path}')
     config = json.loads(CONFIG.read_text())
     sender = config['sender']
-    message = build_message(settings, manifest, sender, now)
+    has_new_announcement = not any(
+        record.get('status') == 'sent' and record.get('announcement_date') == manifest['announcement_date']
+        for record in state.values()
+    )
+    message = build_message(settings, manifest, sender, now, has_new_announcement)
     with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=ssl.create_default_context(), timeout=45) as server:
         server.login(sender, config['app_password'])
         state[day] = {'status': 'pending', 'message_id': message['Message-ID'],
