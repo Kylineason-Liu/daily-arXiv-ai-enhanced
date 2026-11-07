@@ -1,4 +1,4 @@
-"""Install the confirmed weekday 09:00 Hong Kong schedule without starting a job now."""
+"""Install the confirmed weekday 09:30 Hong Kong schedule without starting a job now."""
 import json
 import os
 from pathlib import Path
