@@ -1,0 +1,30 @@
+{
+  "announcement_date": "2026-11-25",
+  "categories": {
+    "cs.RO": {
+      "New submissions": 91,
+      "Cross-lists": 20
+    },
+    "cs.AI": {
+      "New submissions": 102,
+      "Cross-lists": 198
+    },
+    "cs.LG": {
+      "New submissions": 144,
+      "Cross-lists": 89
+    },
+    "eess.SY": {
+      "New submissions": 19,
+      "Cross-lists": 12
+    },
+    "cs.CV": {
+      "New submissions": 264,
+      "Cross-lists": 38
+    }
+  },
+  "total_unique": 763,
+  "model": "gpt-6.1-sol",
+  "language": "Chinese",
+  "sample": false,
+  "generated_at": "2026-11-26T01:57:41.451168+08:00"
+}
